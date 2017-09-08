@@ -1,3 +1,22 @@
+// https://github.com/uxitten/polyfill/blob/master/string.polyfill.js
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
+if (!String.prototype.padStart) {
+    String.prototype.padStart = function padStart(targetLength,padString) {
+        targetLength = targetLength>>0; //floor if number or convert non-number to 0;
+        padString = String(padString || ' ');
+        if (this.length > targetLength) {
+            return String(this);
+        }
+        else {
+            targetLength = targetLength-this.length;
+            if (targetLength > padString.length) {
+                padString += padString.repeat(targetLength/padString.length); //append to original to ensure we are longer than needed
+            }
+            return padString.slice(0,targetLength) + String(this);
+        }
+    };
+}
+
 var THREEx = THREEx || {}
 
 THREEx.ArPatternFile = {}
@@ -16,7 +35,7 @@ THREEx.ArPatternFile.encodeImageURL = function(imageURL, onComplete){
 		var patternFileString = THREEx.ArPatternFile.encodeImage(image)
 		onComplete(patternFileString)
 	}
-	image.src = imageURL;	
+	image.src = imageURL;
 }
 
 THREEx.ArPatternFile.encodeImage = function(image){
@@ -39,7 +58,7 @@ THREEx.ArPatternFile.encodeImage = function(image){
 		context.rotate(orientation);
 		context.drawImage(image, -canvas.width/2,-canvas.height/2, canvas.width, canvas.height);
 		context.restore();
-		
+
 		// get imageData
 		var imageData = context.getImageData(0, 0, canvas.width, canvas.height)
 
@@ -62,7 +81,7 @@ THREEx.ArPatternFile.encodeImage = function(image){
 			}
 		}
 	}
-		
+
 	return patternFileString
 }
 
@@ -91,7 +110,7 @@ THREEx.ArPatternFile.buildFullMarker =  function(innerImageURL, onComplete){
 
 	context.fillStyle = 'white';
 	context.fillRect(0,0,canvas.width, canvas.height)
-		
+
 	// copy image on canvas
 	context.fillStyle = 'black';
 	context.fillRect(
@@ -121,7 +140,7 @@ THREEx.ArPatternFile.buildFullMarker =  function(innerImageURL, onComplete){
 			canvas.width * (1-2*innerMargin),
 			canvas.height * (1-2*innerMargin)
 		);
-		
+
 		var imageUrl = canvas.toDataURL()
 		onComplete(imageUrl)
 	})

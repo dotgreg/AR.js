@@ -15,13 +15,15 @@
 <script src='../../../src/threex/threex-arsmoothedcontrols.js'></script>
 <script>THREEx.ArToolkitContext.baseURL = '../../../'</script>
 
+<!-- <script src="https://jsconsole.com/js/remote.js?1a887452-f62d-4fd2-a984-e29367ccc91b"></script> -->
+
 <!-- include THREEx.ArPatternFile -->
 <script src='../threex-arpatternfile.js'></script>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center;z-index:1';>
-	<a href='https://github.com/jeromeetienne/AR.js/' target='_blank'>AR.js</a> - developement playground
-	<br/>
-	Contact me any time at <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
+	AR.js - proof of concept developed by 31Ten for Wechat browser
+	<br> custom colored complex marker (download <a href="https://demos.carl-f-bucherer-ip.com/arjs/three.js/examples/marker-training/examples/pattern-images/pattern-shoe.png">here</a>)
+	<br> back camera automatic selection
 </div><script>
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Init
@@ -52,7 +54,7 @@
 	var directionalLight = new THREE.DirectionalLight( 0x887766 );
 	directionalLight.position.set( -1, 1, 1 ).normalize();
 	scene.add( directionalLight );
-	
+
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Initialize a basic camera
 	//////////////////////////////////////////////////////////////////////////////////
@@ -66,23 +68,23 @@
 	////////////////////////////////////////////////////////////////////////////////
 
 	var arToolkitSource = new THREEx.ArToolkitSource({
-		// to read from the webcam 
+		// to read from the webcam
 		sourceType : 'webcam',
-		
+
 		// // to read from an image
 		// sourceType : 'image',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
+		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',
 
 		// to read from a video
 		// sourceType : 'video',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
+		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',
 	})
 
 	arToolkitSource.init(function onReady(){
 		// handle resize of renderer
-		arToolkitSource.onResize([renderer.domElement, arToolkitContext.arController.canvas])		
+		if(arToolkitContext.arController) arToolkitSource.onResize([renderer.domElement, arToolkitContext.arController.canvas])
 	})
-	
+
 	// handle resize
 	window.addEventListener('resize', function(){
 		// handle arToolkitSource resize
@@ -91,7 +93,7 @@
 
 	////////////////////////////////////////////////////////////////////////////////
 	//          initialize arToolkitContext
-	////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////
 
 	// create atToolkitContext
 	var arToolkitContext = new THREEx.ArToolkitContext({
@@ -109,28 +111,27 @@
 	// update artoolkit on every frame
 	onRenderFcts.push(function(){
 		if( arToolkitSource.ready === false )	return
-
 		arToolkitContext.update( arToolkitSource.domElement )
 	})
-	
-	
+
+
 	////////////////////////////////////////////////////////////////////////////////
 	//          Create a ArMarkerControls
 	////////////////////////////////////////////////////////////////////////////////
-	
+
 	var markerRoot = new THREE.Group
 	scene.add(markerRoot)
 
 	// load image and convert it to a marker
-	var imageURL = THREEx.ArToolkitContext.baseURL + 'examples/marker-training/examples/inner-images/inner-hiro.png'
+	var imageURL = THREEx.ArToolkitContext.baseURL + 'examples/marker-training/examples/inner-images/inner-shoe.png'
 	THREEx.ArPatternFile.encodeImageURL(imageURL, function onComplete(patternFileString){
 		var patternURL = 'data:text/plain;base64,' + btoa(patternFileString)
 		// create THREEx.ArMarkerControls
 		var markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
 			type : 'pattern',
-			patternUrl : THREEx.ArToolkitContext.baseURL + 'examples/marker-training/examples/pattern-files/pattern-hiro.patt',
+			patternUrl : THREEx.ArToolkitContext.baseURL + 'examples/marker-training/examples/pattern-files/pattern-shoe.patt',
 			patternUrl : patternURL,
-		})	
+		})
 	})
 
 	// build a smoothedControls
@@ -142,8 +143,8 @@
 	})
 	onRenderFcts.push(function(delta){
 		smoothedControls.update(markerRoot)
-	})	
-	
+	})
+
 	// smoothedControls.addEventListener('becameVisible', function(){
 	// 	console.log('becameVisible event notified')
 	// })
@@ -159,26 +160,26 @@
 	var mesh = new THREE.AxisHelper()
 	// markerRoot.add(mesh)
 	smoothedRoot.add(mesh)
-	
-	// add a torus knot	
+
+	// add a torus knot
 	var geometry	= new THREE.CubeGeometry(1,1,1);
 	var material	= new THREE.MeshNormalMaterial({
 		transparent : true,
 		opacity: 0.5,
 		side: THREE.DoubleSide
-	}); 
+	});
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= geometry.parameters.height/2
 	// markerRoot.add( mesh );
 	smoothedRoot.add(mesh)
-	
+
 	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-	var material	= new THREE.MeshNormalMaterial(); 
+	var material	= new THREE.MeshNormalMaterial();
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= 0.5
 	// markerRoot.add( mesh );
 	smoothedRoot.add( mesh );
-	
+
 	onRenderFcts.push(function(delta){
 		mesh.rotation.x += delta * Math.PI
 	})
